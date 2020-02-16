@@ -1,0 +1,9 @@
+.vs/*
+Libraries/Infrastructure/bin/*
+Libraries/Infrastructure/obj/*
+Libraries/Persistence.MySql/bin/*
+Libraries/Persistence.MySql/obj/*
+Presentation/WebAPI/bin/*
+Presentation/WebAPI/obj/*
+Presentation/WebAPI/Todo.WebAPI.xml
+Presentation/VueUI/*
