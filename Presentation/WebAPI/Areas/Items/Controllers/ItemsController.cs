@@ -28,10 +28,10 @@ namespace Todo.WebAPI.Areas.Items.Controllers
         }
 
         /// <summary>
-        /// Lookup for items
+        /// Paged lookup for items
         /// </summary>
         /// <remarks>
-        /// Lookup for Todo items, filtered by the optional paramaters.
+        /// Paged lookup for Todo items, filtered by the optional paramaters.
         /// </remarks>
         /// <param name="created_after">Filter items created after this value</param>
         /// <param name="created_before">Filter items created before this value</param>
@@ -43,11 +43,10 @@ namespace Todo.WebAPI.Areas.Items.Controllers
         /// <param name="sort_by">Sort the items by this value</param>
         /// <returns>Paged collection of items that match the optional parameters</returns>
         /// <response code="200">Paged collection of items that match the optional parameters.</response>
-        /// <response code="500">Internal error has occurred. See the error message.</response>
         [HttpGet("")]
         [Produces("application/json")]
         [ProducesResponseType(typeof(PagedCollection<ParentTodoItemLookup>), (int)HttpStatusCode.OK)]
-        public async Task<IActionResult> LookupItems
+        public async Task<IActionResult> PagedLookupItems
         (
             [FromQuery] DateTime? created_after = null,
             [FromQuery] DateTime? created_before = null,
@@ -73,6 +72,53 @@ namespace Todo.WebAPI.Areas.Items.Controllers
                 SortBy = sort_by
             };
             var lookup = await _queryService.PagedLookupParentItems(page, pageSize, parameter);
+
+            return Ok(lookup);
+        }
+        
+        /// <summary>
+        /// Lookup all items
+        /// </summary>
+        /// <remarks>
+        /// Lookup all Todo items, filtered by the optional paramaters.
+        /// </remarks>
+        /// <param name="created_after">Filter items created after this value</param>
+        /// <param name="created_before">Filter items created before this value</param>
+        /// <param name="search_by">Filter items whose name matches this value</param>
+        /// <param name="item_ids">Filter itmes whose itemId is contained within this value</param>
+        /// <param name="filter_by_status">Filters items to those whose status matches this value</param>
+        /// <param name="filter_by_importance">Filters items to those whose importance matches this value</param>
+        /// <param name="filter_by_priority">Filters items to those whose priority matches this value</param>
+        /// <param name="sort_by">Sort the items by this value</param>
+        /// <returns>Paged collection of items that match the optional parameters</returns>
+        /// <response code="200">Collection of items that match the optional parameters.</response>
+        [HttpGet("all")]
+        [Produces("application/json")]
+        [ProducesResponseType(typeof(ICollection<ParentTodoItemLookup>), (int)HttpStatusCode.OK)]
+        public async Task<IActionResult> LookupAllItems
+        (
+            [FromQuery] DateTime? created_after = null,
+            [FromQuery] DateTime? created_before = null,
+            [FromQuery] string search_by = null,
+            [FromQuery] ICollection<Guid> item_ids = null,
+            [FromQuery] TodoItemStatus? filter_by_status = null,
+            [FromQuery] ImportanceLevel? filter_by_importance = null,
+            [FromQuery] PriorityLevel? filter_by_priority = null,
+            [FromQuery] SortTodoItemsBy? sort_by = null
+        )
+        {
+            var parameter = new TodoItemLookupParams
+            {
+                CreatedAfter = created_after,
+                CreatedBefore = created_before,
+                SearchBy = search_by,
+                ItemIds = item_ids,
+                FilterByStatus = filter_by_status,
+                FilterByImportance = filter_by_importance,
+                FilterByPriority = filter_by_priority,
+                SortBy = sort_by
+            };
+            var lookup = await _queryService.LookupParentItems(parameter);
 
             return Ok(lookup);
         }
