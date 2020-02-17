@@ -44,20 +44,25 @@ namespace Todo.WebAPI
                 options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
             });
 
-            #region Other
+            services.AddCors(options =>
+            {
+                // this defines a CORS policy called "default"
+                options.AddPolicy("default", policy =>
+                {
+                    policy.AllowAnyOrigin()
+                        .AllowAnyHeader()
+                        .AllowAnyMethod();
+                });
+            });
 
             // Context accessor
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
-
-            #endregion Other
 
             #region Swagger
 
             services.AddSwaggerGen(options =>
             {
-                //var lastModified = new FileInfo(GetType().Assembly.Location).LastWriteTimeUtc;
-                var description = GetType().Assembly
-                    .ReadEmbeddedResource("Todo.WebAPI.Docs.Description.md");
+                var description = GetType().Assembly.ReadEmbeddedResource("Todo.WebAPI.Docs.Description.md");
 
                 options.SwaggerDoc("v1", new OpenApiInfo
                 {
@@ -75,17 +80,6 @@ namespace Todo.WebAPI
             });
 
             #endregion Swagger
-
-            services.AddCors(options =>
-            {
-                // this defines a CORS policy called "default"
-                options.AddPolicy("default", policy =>
-                {
-                    policy.AllowAnyOrigin()
-                        .AllowAnyHeader()
-                        .AllowAnyMethod();
-                });
-            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -109,13 +103,13 @@ namespace Todo.WebAPI
 
             app.UseRouting();
 
-            app.UseAuthorization();
-
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
             });
         }
+
+        #region Methods
 
         private static void AddSwagger(IApplicationBuilder app)
         {
@@ -129,6 +123,18 @@ namespace Todo.WebAPI
 
                 options.ExpandResponses(string.Empty);
             });
+        }
+
+        private static string GetUser(HttpContext httpContext)
+        {
+            return httpContext?.User?.Identity?.Name ?? "system";
+        }
+
+        private static string GetPath(HttpContext httpContext)
+        {
+            var request = httpContext?.Request;
+
+            return request == null ? "/no-context" : $"{request.Path} [{request.Method}]";
         }
 
         private void AddDataServices(IServiceCollection services)
@@ -175,20 +181,6 @@ namespace Todo.WebAPI
                 options.Password = mySqlOptions.Password;
                 options.Version = mySqlOptions.Version;
             });
-        }
-
-        #region Methods
-
-        private static string GetUser(HttpContext httpContext)
-        {
-            return httpContext?.User?.Identity?.Name ?? "system";
-        }
-
-        private static string GetPath(HttpContext httpContext)
-        {
-            var request = httpContext?.Request;
-
-            return request == null ? "/no-context" : $"{request.Path} [{request.Method}]";
         }
 
         #endregion Methods
