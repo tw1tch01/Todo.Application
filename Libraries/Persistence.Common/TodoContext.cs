@@ -2,10 +2,10 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Todo.Domain.Entities;
-using Todo.Persistence.MySQL.Configurations;
+using Todo.Persistence.Common.Configurations;
 using Todo.Services.Common;
 
-namespace Todo.Persistence.MySQL
+namespace Todo.Persistence.Common
 {
     public class TodoContext : DbContext, ITodoContext
     {

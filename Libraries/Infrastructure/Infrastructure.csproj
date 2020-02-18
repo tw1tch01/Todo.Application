@@ -8,7 +8,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Workflows\" />
+    <Compile Remove="Workflows\**" />
+    <EmbeddedResource Remove="Workflows\**" />
+    <None Remove="Workflows\**" />
   </ItemGroup>
 
   <ItemGroup>

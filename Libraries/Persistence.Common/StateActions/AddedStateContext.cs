@@ -3,7 +3,7 @@ using Data.Extensions;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Todo.Domain.Common;
 
-namespace Todo.Persistence.MySQL.StateActions
+namespace Todo.Persistence.Common.StateActions
 {
     public class AddedStateContext
     {

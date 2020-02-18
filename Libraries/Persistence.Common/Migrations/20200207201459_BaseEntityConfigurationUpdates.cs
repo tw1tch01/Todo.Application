@@ -1,7 +1,7 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
-namespace Todo.Persistence.MySQL.Migrations
+namespace Todo.Persistence.Common.Migrations
 {
     public partial class BaseEntityConfigurationUpdates : Migration
     {

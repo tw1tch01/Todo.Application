@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Todo.Domain.Entities;
 
-namespace Todo.Persistence.MySQL.Configurations
+namespace Todo.Persistence.Common.Configurations
 {
     public class TodoItemNoteConfiguration : BaseEntityConfiguration<TodoItemNote>
     {

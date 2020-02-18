@@ -24,7 +24,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\Libraries\Infrastructure\Infrastructure.csproj" />
-    <ProjectReference Include="..\..\Libraries\Persistence.MySQL\Persistence.MySQL.csproj" />
+    <ProjectReference Include="..\..\Libraries\Persistence.MySql\Persistence.MySql.csproj" />
   </ItemGroup>
 
   <ItemGroup>

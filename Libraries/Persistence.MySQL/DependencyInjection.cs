@@ -2,10 +2,11 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Pomelo.EntityFrameworkCore.MySql.Infrastructure;
-using Todo.Persistence.MySQL.Options;
+using Todo.Persistence.Common;
+using Todo.Persistence.MySql.Options;
 using Todo.Services.Common;
 
-namespace Todo.Persistence.MySQL
+namespace Todo.Persistence.MySql
 {
     public static class DependencyInjection
     {
@@ -21,7 +22,7 @@ namespace Todo.Persistence.MySQL
                 contextOptions =>
                 {
                     contextOptions.ServerVersion(new Version(options.Version.Major, options.Version.Minor, options.Version.Build), ServerType.MySql);
-                    contextOptions.MigrationsAssembly("Todo.Persistence.MySQL");
+                    contextOptions.MigrationsAssembly("Todo.Persistence.Common");
                 }), ServiceLifetime.Transient);
 
             return services;

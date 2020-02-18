@@ -1,9 +1,14 @@
 .vs/*
 Libraries/Infrastructure/bin/*
 Libraries/Infrastructure/obj/*
+Libraries/Persistence.Common/bin/*
+Libraries/Persistence.Common/obj/*
 Libraries/Persistence.MySql/bin/*
 Libraries/Persistence.MySql/obj/*
+Libraries/Persistence.SqlServer/bin/*
+Libraries/Persistence.SqlServer/obj/*
 Presentation/WebAPI/bin/*
 Presentation/WebAPI/obj/*
 Presentation/WebAPI/Todo.WebAPI.xml
 Presentation/VueUI/*
+Libraries/Persistence.Common/bin/Debug/netstandard2.1/Todo.Persistence.Common.deps.json

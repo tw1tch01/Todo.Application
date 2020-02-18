@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Todo.Domain.Entities;
 using Todo.Domain.Enums;
 
-namespace Todo.Persistence.MySQL.Configurations
+namespace Todo.Persistence.Common.Configurations
 {
     public class TodoItemConfiguration : BaseEntityConfiguration<TodoItem>
     {

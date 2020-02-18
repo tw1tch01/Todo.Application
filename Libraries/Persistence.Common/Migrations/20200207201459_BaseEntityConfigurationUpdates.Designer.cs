@@ -4,19 +4,18 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using Todo.Persistence.MySQL;
 
-namespace Todo.Persistence.MySQL.Migrations
+namespace Todo.Persistence.Common.Migrations
 {
     [DbContext(typeof(TodoContext))]
-    [Migration("20200207045517_Init")]
-    partial class Init
+    [Migration("20200207201459_BaseEntityConfigurationUpdates")]
+    partial class BaseEntityConfigurationUpdates
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "3.1.0")
+                .HasAnnotation("ProductVersion", "3.1.1")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
             modelBuilder.Entity("Todo.Domain.Entities.TodoItem", b =>
@@ -56,16 +55,13 @@ namespace Todo.Persistence.MySQL.Migrations
                         .HasColumnType("longtext CHARACTER SET utf8mb4");
 
                     b.Property<string>("ModifiedBy")
-                        .IsRequired()
                         .HasColumnType("varchar(256) CHARACTER SET utf8mb4")
                         .HasMaxLength(256);
 
                     b.Property<DateTime?>("ModifiedOn")
-                        .IsRequired()
                         .HasColumnType("datetime(6)");
 
                     b.Property<string>("ModifiedProcess")
-                        .IsRequired()
                         .HasColumnType("varchar(1024) CHARACTER SET utf8mb4")
                         .HasMaxLength(1024);
 
@@ -121,16 +117,13 @@ namespace Todo.Persistence.MySQL.Migrations
                         .HasColumnType("char(36)");
 
                     b.Property<string>("ModifiedBy")
-                        .IsRequired()
                         .HasColumnType("varchar(256) CHARACTER SET utf8mb4")
                         .HasMaxLength(256);
 
                     b.Property<DateTime?>("ModifiedOn")
-                        .IsRequired()
                         .HasColumnType("datetime(6)");
 
                     b.Property<string>("ModifiedProcess")
-                        .IsRequired()
                         .HasColumnType("varchar(1024) CHARACTER SET utf8mb4")
                         .HasMaxLength(1024);
 

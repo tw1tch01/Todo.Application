@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29409.12
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Persistence.MySQL", "Libraries\Persistence.MySQL\Persistence.MySQL.csproj", "{1F4CEE88-F4B4-48BD-AA15-B36246138C65}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Persistence.Common", "Libraries\Persistence.Common\Persistence.Common.csproj", "{1F4CEE88-F4B4-48BD-AA15-B36246138C65}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Libraries", "Libraries", "{4D13DB6B-34EF-4EA3-B5D9-0311F38D4EDE}"
 EndProject
@@ -16,6 +16,10 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Infrastructure", "Libraries\Infrastructure\Infrastructure.csproj", "{64CCDEF7-7A9E-4DB0-9EDD-9CA683D175DA}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebAPI", "Presentation\WebAPI\WebAPI.csproj", "{53B38A4B-542B-4BC6-B4F4-E85019D3ECEE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Persistence.MySql", "Libraries\Persistence.MySql\Persistence.MySql.csproj", "{1A43642B-D15D-494D-91F0-F68EA34826A6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Persistence.SqlServer", "Libraries\Persistence.SqlServer\Persistence.SqlServer.csproj", "{9B62D5D4-242F-468D-BE28-0D2FAD400953}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -35,6 +39,14 @@ Global
 		{53B38A4B-542B-4BC6-B4F4-E85019D3ECEE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{53B38A4B-542B-4BC6-B4F4-E85019D3ECEE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{53B38A4B-542B-4BC6-B4F4-E85019D3ECEE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1A43642B-D15D-494D-91F0-F68EA34826A6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1A43642B-D15D-494D-91F0-F68EA34826A6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1A43642B-D15D-494D-91F0-F68EA34826A6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1A43642B-D15D-494D-91F0-F68EA34826A6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9B62D5D4-242F-468D-BE28-0D2FAD400953}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9B62D5D4-242F-468D-BE28-0D2FAD400953}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9B62D5D4-242F-468D-BE28-0D2FAD400953}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9B62D5D4-242F-468D-BE28-0D2FAD400953}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -43,6 +55,8 @@ Global
 		{1F4CEE88-F4B4-48BD-AA15-B36246138C65} = {4D13DB6B-34EF-4EA3-B5D9-0311F38D4EDE}
 		{64CCDEF7-7A9E-4DB0-9EDD-9CA683D175DA} = {4D13DB6B-34EF-4EA3-B5D9-0311F38D4EDE}
 		{53B38A4B-542B-4BC6-B4F4-E85019D3ECEE} = {A90D9DA7-BD0E-4C7B-B499-921083817FAA}
+		{1A43642B-D15D-494D-91F0-F68EA34826A6} = {4D13DB6B-34EF-4EA3-B5D9-0311F38D4EDE}
+		{9B62D5D4-242F-468D-BE28-0D2FAD400953} = {4D13DB6B-34EF-4EA3-B5D9-0311F38D4EDE}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {19AB91BA-F9B2-4183-B407-EA14516E92BD}

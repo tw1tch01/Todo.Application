@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Todo.Persistence.MySQL.Options
+﻿namespace Todo.Persistence.MySql.Options
 {
     public class MySqlOptions
     {

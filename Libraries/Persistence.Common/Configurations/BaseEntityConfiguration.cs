@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Todo.Domain.Common;
 
-namespace Todo.Persistence.MySQL.Configurations
+namespace Todo.Persistence.Common.Configurations
 {
     public abstract class BaseEntityConfiguration<TEntity> : IEntityTypeConfiguration<TEntity> where TEntity : BaseEntity
     {

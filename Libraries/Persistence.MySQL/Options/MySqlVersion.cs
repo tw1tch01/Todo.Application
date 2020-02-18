@@ -1,4 +1,4 @@
-﻿namespace Todo.Persistence.MySQL.Options
+﻿namespace Todo.Persistence.MySql.Options
 {
     public class MySqlVersion
     {
