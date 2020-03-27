@@ -3,6 +3,7 @@ using System.IO;
 using System.Reflection;
 using System.Text.Json.Serialization;
 using Data.Common;
+using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -39,10 +40,15 @@ namespace Todo.WebAPI
             services.AddInfrastructure();
             services.AddControllers();
 
-            services.AddMvc().AddJsonOptions(options =>
-            {
-                options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
-            });
+            services.AddMvc()
+                    .AddJsonOptions(options =>
+                    {
+                        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+                    })
+                    .AddFluentValidation(options =>
+                    {
+                        options.RegisterValidatorsFromAssembly(Assembly.GetExecutingAssembly());
+                    });
 
             services.AddCors(options =>
             {

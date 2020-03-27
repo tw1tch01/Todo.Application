@@ -75,7 +75,7 @@ namespace Todo.WebAPI.Areas.Items.Controllers
 
             return Ok(lookup);
         }
-        
+
         /// <summary>
         /// Lookup all items
         /// </summary>
@@ -160,6 +160,11 @@ namespace Todo.WebAPI.Areas.Items.Controllers
         [ProducesResponseType(typeof(ApiErrorResponse), (int)HttpStatusCode.BadRequest)]
         public async Task<IActionResult> AddItem([FromBody]CreateItemDto itemDto)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
             var itemId = await _commandService.CreateItem(itemDto);
 
             return CreatedAtAction(nameof(GetItem), new { itemId }, new CreatedItemResponseModel(itemId));

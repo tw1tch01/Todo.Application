@@ -18,20 +18,20 @@ namespace Todo.Persistence.Common.Configurations
             #region Foreign Keys
 
             builder.HasMany(parentItem => parentItem.ChildItems)
-                       .WithOne(childItem => childItem.ParentItem)
-                       .HasForeignKey(childItem => childItem.ParentItemId);
+                   .WithOne(childItem => childItem.ParentItem)
+                   .HasForeignKey(childItem => childItem.ParentItemId);
 
             #endregion Foreign Keys
 
             #region Properties
 
             builder.Property(item => item.PriorityLevel)
-                       .IsRequired()
-                       .HasConversion(priority => priority.ToString(), priorityString => (PriorityLevel)Enum.Parse(typeof(PriorityLevel), priorityString));
+                   .IsRequired()
+                   .HasConversion(priority => priority.ToString(), priorityString => (PriorityLevel)Enum.Parse(typeof(PriorityLevel), priorityString));
 
             builder.Property(item => item.ImportanceLevel)
-                       .IsRequired()
-                       .HasConversion(importance => importance.ToString(), priorityString => (ImportanceLevel)Enum.Parse(typeof(ImportanceLevel), priorityString));
+                   .IsRequired()
+                   .HasConversion(importance => importance.ToString(), priorityString => (ImportanceLevel)Enum.Parse(typeof(ImportanceLevel), priorityString));
 
             builder.Property(item => item.CancelledOn)
                    .IsRequired(false);
@@ -56,6 +56,13 @@ namespace Todo.Persistence.Common.Configurations
                    .HasMaxLength(64);
 
             #endregion Properties
+
+            #region Indexes
+
+            builder.HasIndex(item => item.Name)
+                   .IsUnique();
+
+            #endregion Indexes
 
             base.Configure(builder);
         }
