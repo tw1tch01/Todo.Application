@@ -15,12 +15,7 @@ namespace Todo.WebAPI.Handlers
             var feature = context.Features.Get<IExceptionHandlerPathFeature>();
             var exception = feature.Error;
 
-            var response = new ApiResponse
-            {
-                Endpoint = context.Request.Path,
-                Method = context.Request.Method,
-                Message = exception.Message
-            };
+            var response = new ApiResponse(context, exception);
 
             context.Response.ContentType = "application/json";
             context.Response.StatusCode = (int)GetStatusCode(exception);

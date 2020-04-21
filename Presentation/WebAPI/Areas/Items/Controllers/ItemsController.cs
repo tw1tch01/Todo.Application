@@ -11,7 +11,6 @@ using Todo.DomainModels.TodoItems.Enums;
 using Todo.Services.TodoItems.Validation;
 using Todo.WebAPI.Common;
 using Todo.WebAPI.Extensions;
-using Todo.WebAPI.Factories;
 
 namespace Todo.WebAPI.Areas.Items.Controllers
 {
@@ -23,7 +22,7 @@ namespace Todo.WebAPI.Areas.Items.Controllers
         private readonly ItemsQueryService _queryService;
 
         public ItemsController(
-            ItemsCommandService commandService, 
+            ItemsCommandService commandService,
             ItemsQueryService queryService)
         {
             _commandService = commandService;
@@ -144,7 +143,7 @@ namespace Todo.WebAPI.Areas.Items.Controllers
         {
             var item = await _queryService.GetItem(itemId);
 
-            if (item == null) return HandleInvalidResult(ItemValidationResultFactory.ItemNotFound(itemId));
+            if (item == null) return HandleInvalidResult(new ItemNotFoundResult(itemId));
 
             return Ok(item);
         }
@@ -346,7 +345,7 @@ namespace Todo.WebAPI.Areas.Items.Controllers
 
         private IActionResult HandleInvalidResult(ItemValidationResult result)
         {
-            var response = ApiResponseFactory.CreateResponse(HttpContext, result);
+            var response = new ApiResponse(HttpContext, result);
 
             if (result.GetType().IsTypeOf<ItemNotFoundResult>())
             {
@@ -358,7 +357,7 @@ namespace Todo.WebAPI.Areas.Items.Controllers
 
         private IActionResult HandleValidResult(ItemValidationResult result)
         {
-            var response = ApiResponseFactory.CreateResponse(HttpContext, result);
+            var response = new ApiResponse(HttpContext, result);
 
             if (result.GetType().IsTypeOf<ItemCreatedResult>())
             {
