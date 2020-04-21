@@ -8,7 +8,6 @@ using Todo.Services.TodoNotes.Validation;
 using Todo.WebAPI.Areas.Items.Controllers;
 using Todo.WebAPI.Common;
 using Todo.WebAPI.Extensions;
-using Todo.WebAPI.Factories;
 
 namespace Todo.WebAPI.Areas.Notes.Controllers
 {
@@ -129,7 +128,7 @@ namespace Todo.WebAPI.Areas.Notes.Controllers
 
         private IActionResult HandleInvalidResult(NoteValidationResult result)
         {
-            var response = ApiResponseFactory.CreateResponse(HttpContext, result);
+            var response = new ApiResponse(HttpContext, result);
 
             if (result.GetType().IsTypeOf<NoteNotFoundResult>() || result.GetType().IsTypeOf<ItemNotFoundResult>())
             {
@@ -141,7 +140,7 @@ namespace Todo.WebAPI.Areas.Notes.Controllers
 
         private IActionResult HandleValidResult(NoteValidationResult result)
         {
-            var response = ApiResponseFactory.CreateResponse(HttpContext, result);
+            var response = new ApiResponse(HttpContext, result);
 
             if (result.GetType().IsTypeOf<NoteNotFoundResult>())
             {
