@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Http;
 using Todo.Domain.Exceptions;
-using Todo.Services.Common.Exceptions;
 using Todo.WebAPI.Common;
 
 namespace Todo.WebAPI.Handlers
@@ -16,11 +15,11 @@ namespace Todo.WebAPI.Handlers
             var feature = context.Features.Get<IExceptionHandlerPathFeature>();
             var exception = feature.Error;
 
-            var response = new ApiErrorResponse
+            var response = new ApiResponse
             {
                 Endpoint = context.Request.Path,
                 Method = context.Request.Method,
-                Error = exception.Message
+                Message = exception.Message
             };
 
             context.Response.ContentType = "application/json";
@@ -32,15 +31,10 @@ namespace Todo.WebAPI.Handlers
         {
             switch (exception)
             {
-                case BadRequestException _ when exception is BadRequestException:
                 case ItemAlreadyStartedException _ when exception is ItemAlreadyStartedException:
                 case ItemPreviouslyCancelledException _ when exception is ItemPreviouslyCancelledException:
                 case ItemPreviouslyCompletedException _ when exception is ItemPreviouslyCompletedException:
-                case ValidationException _ when exception is ValidationException:
                     return HttpStatusCode.BadRequest;
-
-                case NotFoundException _ when exception is NotFoundException:
-                    return HttpStatusCode.NotFound;
 
                 default:
                     return HttpStatusCode.InternalServerError;

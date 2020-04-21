@@ -4,24 +4,27 @@ using System.Net;
 using System.Threading.Tasks;
 using Data.Common;
 using Microsoft.AspNetCore.Mvc;
-using Todo.Application.Services.TodoItems.ItemCommands;
-using Todo.Application.Services.TodoItems.ItemQueries;
+using Todo.Application.Services.TodoItems;
 using Todo.Domain.Enums;
 using Todo.DomainModels.TodoItems;
 using Todo.DomainModels.TodoItems.Enums;
-using Todo.WebAPI.Areas.Items.Models;
+using Todo.Services.TodoItems.Validation;
 using Todo.WebAPI.Common;
+using Todo.WebAPI.Extensions;
+using Todo.WebAPI.Factories;
 
 namespace Todo.WebAPI.Areas.Items.Controllers
 {
     [Area(AreaNames.Items)]
-    [Route("api/[controller]")]
+    [ApiVersion("1.0")]
     public class ItemsController : AbstractController
     {
-        private readonly IItemsCommandService _commandService;
-        private readonly IItemsQueryService _queryService;
+        private readonly ItemsCommandService _commandService;
+        private readonly ItemsQueryService _queryService;
 
-        public ItemsController(IItemsCommandService commandService, IItemsQueryService queryService)
+        public ItemsController(
+            ItemsCommandService commandService, 
+            ItemsQueryService queryService)
         {
             _commandService = commandService;
             _queryService = queryService;
@@ -94,7 +97,7 @@ namespace Todo.WebAPI.Areas.Items.Controllers
         /// <response code="200">Collection of items that match the optional parameters.</response>
         [HttpGet("all")]
         [Produces("application/json")]
-        [ProducesResponseType(typeof(ICollection<ParentTodoItemLookup>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(List<ParentTodoItemLookup>), (int)HttpStatusCode.OK)]
         public async Task<IActionResult> LookupAllItems
         (
             [FromQuery] DateTime? created_after = null,
@@ -136,10 +139,12 @@ namespace Todo.WebAPI.Areas.Items.Controllers
         [HttpGet("{itemId:guid}")]
         [Produces("application/json")]
         [ProducesResponseType(typeof(TodoItemDetails), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(ApiErrorResponse), (int)HttpStatusCode.NotFound)]
+        [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
         public async Task<IActionResult> GetItem(Guid itemId)
         {
             var item = await _queryService.GetItem(itemId);
+
+            if (item == null) return HandleInvalidResult(ItemValidationResultFactory.ItemNotFound(itemId));
 
             return Ok(item);
         }
@@ -156,18 +161,17 @@ namespace Todo.WebAPI.Areas.Items.Controllers
         /// <response code="400">Details in the supplied body aren't valid.</response>
         [HttpPost("")]
         [Produces("application/json")]
-        [ProducesResponseType(typeof(CreatedItemResponseModel), (int)HttpStatusCode.Created)]
-        [ProducesResponseType(typeof(ApiErrorResponse), (int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.Created)]
+        [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.BadRequest)]
         public async Task<IActionResult> AddItem([FromBody]CreateItemDto itemDto)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
+            if (!ModelState.IsValid) return BadRequest(ModelState);
 
-            var itemId = await _commandService.CreateItem(itemDto);
+            var result = await _commandService.CreateItem(itemDto);
 
-            return CreatedAtAction(nameof(GetItem), new { itemId }, new CreatedItemResponseModel(itemId));
+            if (result.IsValid) return HandleValidResult(result);
+
+            return HandleInvalidResult(result);
         }
 
         /// <summary>
@@ -184,14 +188,18 @@ namespace Todo.WebAPI.Areas.Items.Controllers
         /// <response code="404">An item with the specified <paramref name="parentItemId"/> does not exist.</response>
         [HttpPost("{parentItemId:guid}/addchilditem")]
         [Produces("application/json")]
-        [ProducesResponseType(typeof(CreatedItemResponseModel), (int)HttpStatusCode.Created)]
-        [ProducesResponseType(typeof(ApiErrorResponse), (int)HttpStatusCode.BadRequest)]
-        [ProducesResponseType(typeof(ApiErrorResponse), (int)HttpStatusCode.NotFound)]
+        [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.Created)]
+        [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
         public async Task<IActionResult> AddChildItem(Guid parentItemId, [FromBody]CreateItemDto childItemDto)
         {
-            var childItemId = await _commandService.AddChildItem(parentItemId, childItemDto);
+            if (!ModelState.IsValid) return BadRequest(ModelState);
 
-            return CreatedAtAction(nameof(GetItem), new { itemId = childItemId }, new CreatedItemResponseModel(childItemId));
+            var result = await _commandService.AddChildItem(parentItemId, childItemDto);
+
+            if (result.IsValid) return HandleValidResult(result);
+
+            return HandleInvalidResult(result);
         }
 
         /// <summary>
@@ -203,17 +211,22 @@ namespace Todo.WebAPI.Areas.Items.Controllers
         /// <param name="itemId">Unique identifier for the item.</param>
         /// <param name="itemDto">Properties with values that should be updated.</param>
         /// <returns></returns>
-        /// <response code="204">Item has been updated.</response>
+        /// <response code="200">Item has been updated.</response>
         /// <response code="400">Details in the supplied body aren't valid.</response>
         /// <response code="404">An item with the specified <paramref name="itemId"/> does not exist.</response>
         [HttpPatch("{itemId:guid}")]
-        [ProducesResponseType(typeof(ApiErrorResponse), (int)HttpStatusCode.BadRequest)]
-        [ProducesResponseType(typeof(ApiErrorResponse), (int)HttpStatusCode.NotFound)]
+        [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
         public async Task<IActionResult> UpdateItem(Guid itemId, [FromBody]UpdateItemDto itemDto)
         {
-            await _commandService.UpdateItem(itemId, itemDto);
+            if (!ModelState.IsValid) return BadRequest(ModelState);
 
-            return NoContent();
+            var result = await _commandService.UpdateItem(itemId, itemDto);
+
+            if (result.IsValid) return HandleValidResult(result);
+
+            return HandleInvalidResult(result);
         }
 
         /// <summary>
@@ -224,15 +237,18 @@ namespace Todo.WebAPI.Areas.Items.Controllers
         /// </remarks>
         /// <param name="itemId">Unique identifier for the item.</param>
         /// <returns></returns>
-        /// <response code="204">Item has been deleted.</response>
+        /// <response code="200">Item has been deleted.</response>
         /// <response code="404">An item with the specified <paramref name="itemId"/> does not exist.</response>
         [HttpDelete("{itemId:guid}")]
-        [ProducesResponseType(typeof(ApiErrorResponse), (int)HttpStatusCode.NotFound)]
+        [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
         public async Task<IActionResult> DeleteItem(Guid itemId)
         {
-            await _commandService.DeleteItem(itemId);
+            var result = await _commandService.DeleteItem(itemId);
 
-            return NoContent();
+            if (result.IsValid) return HandleValidResult(result);
+
+            return HandleInvalidResult(result);
         }
 
         #region Actions
@@ -243,17 +259,20 @@ namespace Todo.WebAPI.Areas.Items.Controllers
         /// Cancel the Todo item specified by <paramref name="itemId"/>.
         /// <param name="itemId"></param>
         /// <returns></returns>
-        /// <response code="204">Item has been cancelled.</response>
+        /// <response code="200">Item has been cancelled.</response>
         /// <response code="400">Item cannot be cancelled. See error message.</response>
         /// <response code="404">An item with the specified <paramref name="itemId"/> does not exist.</response>
         [HttpPost("{itemId:guid}/cancel")]
-        [ProducesResponseType(typeof(ApiErrorResponse), (int)HttpStatusCode.BadRequest)]
-        [ProducesResponseType(typeof(ApiErrorResponse), (int)HttpStatusCode.NotFound)]
+        [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
         public async Task<IActionResult> CancelItem(Guid itemId)
         {
-            await _commandService.CancelItem(itemId);
+            var result = await _commandService.CancelItem(itemId);
 
-            return NoContent();
+            if (result.IsValid) return HandleValidResult(result);
+
+            return HandleInvalidResult(result);
         }
 
         /// <summary>
@@ -262,17 +281,20 @@ namespace Todo.WebAPI.Areas.Items.Controllers
         /// Complete the Todo item specified by <paramref name="itemId"/>.
         /// <param name="itemId"></param>
         /// <returns></returns>
-        /// <response code="204">Item has been completed.</response>
+        /// <response code="200">Item has been completed.</response>
         /// <response code="400">Item cannot be completed. See error message.</response>
         /// <response code="404">An item with the specified <paramref name="itemId"/> does not exist.</response>
         [HttpPost("{itemId:guid}/complete")]
-        [ProducesResponseType(typeof(ApiErrorResponse), (int)HttpStatusCode.BadRequest)]
-        [ProducesResponseType(typeof(ApiErrorResponse), (int)HttpStatusCode.NotFound)]
+        [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
         public async Task<IActionResult> CompleteItem(Guid itemId)
         {
-            await _commandService.CompleteItem(itemId);
+            var result = await _commandService.CompleteItem(itemId);
 
-            return NoContent();
+            if (result.IsValid) return HandleValidResult(result);
+
+            return HandleInvalidResult(result);
         }
 
         /// <summary>
@@ -281,16 +303,19 @@ namespace Todo.WebAPI.Areas.Items.Controllers
         /// Reset the Todo item specified by <paramref name="itemId"/>.
         /// <param name="itemId"></param>
         /// <returns></returns>
-        /// <response code="204">Item has been cancelled.</response>
+        /// <response code="200">Item has been cancelled.</response>
         /// <response code="404">An item with the specified <paramref name="itemId"/> does not exist.</response>
         [HttpPost("{itemId:guid}/reset")]
-        [ProducesResponseType(typeof(ApiErrorResponse), (int)HttpStatusCode.BadRequest)]
-        [ProducesResponseType(typeof(ApiErrorResponse), (int)HttpStatusCode.NotFound)]
+        [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
         public async Task<IActionResult> ResetItem(Guid itemId)
         {
-            await _commandService.ResetItem(itemId);
+            var result = await _commandService.ResetItem(itemId);
 
-            return NoContent();
+            if (result.IsValid) return HandleValidResult(result);
+
+            return HandleInvalidResult(result);
         }
 
         /// <summary>
@@ -299,19 +324,51 @@ namespace Todo.WebAPI.Areas.Items.Controllers
         /// Start the Todo item specified by <paramref name="itemId"/>.
         /// <param name="itemId"></param>
         /// <returns></returns>
-        /// <response code="204">Item has been started.</response>
+        /// <response code="200">Item has been started.</response>
         /// <response code="400">Item cannot be started. See error message.</response>
         /// <response code="404">An item with the specified <paramref name="itemId"/> does not exist.</response>
         [HttpPost("{itemId:guid}/start")]
-        [ProducesResponseType(typeof(ApiErrorResponse), (int)HttpStatusCode.BadRequest)]
-        [ProducesResponseType(typeof(ApiErrorResponse), (int)HttpStatusCode.NotFound)]
+        [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
         public async Task<IActionResult> StartItem(Guid itemId)
         {
-            await _commandService.StartItem(itemId);
+            var result = await _commandService.StartItem(itemId);
 
-            return NoContent();
+            if (result.IsValid) return HandleValidResult(result);
+
+            return HandleInvalidResult(result);
         }
 
         #endregion Actions
+
+        #region Private Methods
+
+        private IActionResult HandleInvalidResult(ItemValidationResult result)
+        {
+            var response = ApiResponseFactory.CreateResponse(HttpContext, result);
+
+            if (result.GetType().IsTypeOf<ItemNotFoundResult>())
+            {
+                return NotFound(response);
+            }
+
+            return BadRequest(response);
+        }
+
+        private IActionResult HandleValidResult(ItemValidationResult result)
+        {
+            var response = ApiResponseFactory.CreateResponse(HttpContext, result);
+
+            if (result.GetType().IsTypeOf<ItemCreatedResult>())
+            {
+                var itemId = result.Data["ItemId"];
+                return CreatedAtAction(nameof(GetItem), new { itemId }, response);
+            }
+
+            return Ok(response);
+        }
+
+        #endregion Private Methods
     }
 }

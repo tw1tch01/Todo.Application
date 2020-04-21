@@ -5,8 +5,9 @@ using Microsoft.AspNetCore.Mvc;
 namespace Todo.WebAPI.Common
 {
     [ApiController]
+    [Route("api/[controller]")]
     [Produces("application/json")]
-    [ProducesResponseType(typeof(ApiErrorResponse), (int)HttpStatusCode.InternalServerError)]
+    [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.InternalServerError)]
     public abstract class AbstractController : Controller
     {
         private const int _defaultPageSize = 10;

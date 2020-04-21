@@ -7,10 +7,8 @@ namespace Todo.WebAPI.Extensions
     {
         public static string ReadEmbeddedResource(this Assembly assembly, string resourceName)
         {
-            using (var reader = new StreamReader(assembly.GetManifestResourceStream(resourceName)))
-            {
-                return reader.ReadToEnd();
-            }
+            using var reader = new StreamReader(assembly.GetManifestResourceStream(resourceName));
+            return reader.ReadToEnd();
         }
     }
 }

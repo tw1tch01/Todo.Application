@@ -7,6 +7,8 @@ using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Versioning;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -50,6 +52,14 @@ namespace Todo.WebAPI
                         options.RegisterValidatorsFromAssembly(Assembly.GetExecutingAssembly());
                     });
 
+            services.AddApiVersioning(options =>
+            {
+                options.DefaultApiVersion = new ApiVersion(new DateTime(2020, 4, 21), 1, 0);
+                options.AssumeDefaultVersionWhenUnspecified = true;
+                options.ReportApiVersions = true;
+                options.ApiVersionReader = new HeaderApiVersionReader("X-Api-Version");
+            });
+
             services.AddCors(options =>
             {
                 // this defines a CORS policy called "default"
@@ -70,9 +80,9 @@ namespace Todo.WebAPI
             {
                 var description = GetType().Assembly.ReadEmbeddedResource("Todo.WebAPI.Docs.Description.md");
 
-                options.SwaggerDoc("v1", new OpenApiInfo
+                options.SwaggerDoc("v1.0", new OpenApiInfo
                 {
-                    Version = "v1",
+                    Version = "v1.0",
                     Title = "Todo Application API",
                     Description = description,
                     Contact = new OpenApiContact
@@ -124,7 +134,7 @@ namespace Todo.WebAPI
             app.UseReDoc(options =>
             {
                 options.RoutePrefix = "docs";
-                options.SpecUrl = "/swagger/v1/swagger.json";
+                options.SpecUrl = "/swagger/v1.0/swagger.json";
                 options.DocumentTitle = "Todo Application API";
 
                 options.ExpandResponses(string.Empty);

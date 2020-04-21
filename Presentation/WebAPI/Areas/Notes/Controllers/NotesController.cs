@@ -2,21 +2,23 @@
 using System.Net;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Todo.Application.Services.TodoNotes.NoteCommands;
+using Todo.Application.Services.TodoNotes;
 using Todo.DomainModels.TodoNotes;
+using Todo.Services.TodoNotes.Validation;
 using Todo.WebAPI.Areas.Items.Controllers;
-using Todo.WebAPI.Areas.Notes.Models;
 using Todo.WebAPI.Common;
+using Todo.WebAPI.Extensions;
+using Todo.WebAPI.Factories;
 
 namespace Todo.WebAPI.Areas.Notes.Controllers
 {
     [Area(AreaNames.Notes)]
-    [Route("api/[controller]")]
+    [ApiVersion("1.0")]
     public class NotesController : AbstractController
     {
-        private readonly INotesCommandService _commandService;
+        private readonly NotesCommandService _commandService;
 
-        public NotesController(INotesCommandService commandService)
+        public NotesController(NotesCommandService commandService)
         {
             _commandService = commandService;
         }
@@ -25,23 +27,26 @@ namespace Todo.WebAPI.Areas.Notes.Controllers
         /// Add a note to an item
         /// </summary>
         /// <remarks>
-        /// Add a note to the item specified by <paramref name="itemId"/>.
+        /// Add a note to the item specified in the <paramref name="noteDto"/>.
         /// </remarks>
-        /// <param name="itemId">Unique identifier for the item.</param>
         /// <param name="noteDto">Details of the note.</param>
         /// <response code="201">Unique identifier for the added note.</response>
         /// <response code="400">Details in the supplied body aren't valid.</response>
-        /// <response code="404">An item with the specified <paramref name="itemId"/> does not exist.</response>
+        /// <response code="404">The item specified in the request body does not exist.</response>
         /// <returns></returns>
-        [HttpPost("{itemId:guid}")]
-        [ProducesResponseType(typeof(CreatedNoteResponseModel), (int)HttpStatusCode.Created)]
-        [ProducesResponseType(typeof(ApiErrorResponse), (int)HttpStatusCode.BadRequest)]
-        [ProducesResponseType(typeof(ApiErrorResponse), (int)HttpStatusCode.NotFound)]
-        public async Task<IActionResult> AddNoteToItem(Guid itemId, [FromBody]CreateNoteDto noteDto)
+        [HttpPost("")]
+        [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.Created)]
+        [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
+        public async Task<IActionResult> AddNoteToItem([FromBody]CreateNoteDto noteDto)
         {
-            var noteId = await _commandService.CreateNote(itemId, noteDto);
+            if (!ModelState.IsValid) return BadRequest(ModelState);
 
-            return CreatedAtAction(nameof(ItemsController.GetItem), new { itemId }, new CreatedNoteResponseModel(noteId));
+            var result = await _commandService.CreateNote(noteDto);
+
+            if (result.IsValid) return HandleValidResult(result);
+
+            return HandleInvalidResult(result);
         }
 
         /// <summary>
@@ -57,14 +62,18 @@ namespace Todo.WebAPI.Areas.Notes.Controllers
         /// <response code="404">A note with the specified <paramref name="noteId"/> does not exist.</response>
         /// <returns></returns>
         [HttpPost("{noteId:guid}/reply")]
-        [ProducesResponseType(typeof(CreatedNoteResponseModel), (int)HttpStatusCode.Created)]
-        [ProducesResponseType(typeof(ApiErrorResponse), (int)HttpStatusCode.BadRequest)]
-        [ProducesResponseType(typeof(ApiErrorResponse), (int)HttpStatusCode.NotFound)]
+        [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.Created)]
+        [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
         public async Task<IActionResult> ReplyOnNote(Guid noteId, [FromBody]CreateNoteDto replyDto)
         {
-            var replyId = await _commandService.ReplyOnNote(noteId, replyDto);
+            if (!ModelState.IsValid) return BadRequest(ModelState);
 
-            return CreatedAtAction(nameof(ItemsController.GetItem), nameof(ItemsController), new { itemId = (Guid)default }, new CreatedNoteResponseModel(replyId));
+            var result = await _commandService.ReplyOnNote(noteId, replyDto);
+
+            if (result.IsValid) return HandleValidResult(result);
+
+            return HandleInvalidResult(result);
         }
 
         /// <summary>
@@ -76,17 +85,22 @@ namespace Todo.WebAPI.Areas.Notes.Controllers
         /// <param name="noteId">Unique identifier for the note.</param>
         /// <param name="noteDto">Properties with values that should be updated.</param>
         /// <returns></returns>
-        /// <response code="204">Note has been updated.</response>
+        /// <response code="200">Note has been updated.</response>
         /// <response code="400">Details in the supplied body aren't valid.</response>
         /// <response code="404">A note with the specified <paramref name="noteId"/> does not exist.</response>
         [HttpPatch("{noteId:guid}")]
-        [ProducesResponseType(typeof(ApiErrorResponse), (int)HttpStatusCode.BadRequest)]
-        [ProducesResponseType(typeof(ApiErrorResponse), (int)HttpStatusCode.NotFound)]
+        [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
         public async Task<IActionResult> UpdateNote(Guid noteId, [FromBody]UpdateNoteDto noteDto)
         {
-            await _commandService.UpdateNote(noteId, noteDto);
+            if (!ModelState.IsValid) return BadRequest(ModelState);
 
-            return NoContent();
+            var result = await _commandService.UpdateNote(noteId, noteDto);
+
+            if (result.IsValid) return HandleValidResult(result);
+
+            return HandleInvalidResult(result);
         }
 
         /// <summary>
@@ -97,15 +111,47 @@ namespace Todo.WebAPI.Areas.Notes.Controllers
         /// </remarks>
         /// <param name="noteId">Unique identifier for the note.</param>
         /// <returns></returns>
-        /// <response code="204">Item has been deleted.</response>
+        /// <response code="200">Note has been deleted.</response>
         /// <response code="404">A note with the specified <paramref name="noteId"/> does not exist.</response>
         [HttpDelete("{noteId:guid}")]
-        [ProducesResponseType(typeof(ApiErrorResponse), (int)HttpStatusCode.NotFound)]
+        [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
         public async Task<IActionResult> DeleteNote(Guid noteId)
         {
-            await _commandService.DeleteNote(noteId);
+            var result = await _commandService.DeleteNote(noteId);
 
-            return NoContent();
+            if (result.IsValid) return HandleValidResult(result);
+
+            return HandleInvalidResult(result);
         }
+
+        #region Private Methods
+
+        private IActionResult HandleInvalidResult(NoteValidationResult result)
+        {
+            var response = ApiResponseFactory.CreateResponse(HttpContext, result);
+
+            if (result.GetType().IsTypeOf<NoteNotFoundResult>() || result.GetType().IsTypeOf<ItemNotFoundResult>())
+            {
+                return NotFound(response);
+            }
+
+            return BadRequest(response);
+        }
+
+        private IActionResult HandleValidResult(NoteValidationResult result)
+        {
+            var response = ApiResponseFactory.CreateResponse(HttpContext, result);
+
+            if (result.GetType().IsTypeOf<NoteNotFoundResult>())
+            {
+                var itemId = result.Data["ItemId"];
+                return CreatedAtAction(nameof(ItemsController.GetItem), new { itemId }, response);
+            }
+
+            return Ok(response);
+        }
+
+        #endregion Private Methods
     }
 }
