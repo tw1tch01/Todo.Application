@@ -1,4 +1,4 @@
-# todo.vueui
+# vue.todo
 
 ## Project setup
 ```

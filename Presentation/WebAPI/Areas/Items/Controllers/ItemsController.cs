@@ -9,6 +9,7 @@ using Todo.Domain.Enums;
 using Todo.DomainModels.TodoItems;
 using Todo.DomainModels.TodoItems.Enums;
 using Todo.Services.TodoItems.Validation;
+using Todo.WebAPI.Areas.Items.Models;
 using Todo.WebAPI.Common;
 using Todo.WebAPI.Extensions;
 
@@ -133,11 +134,11 @@ namespace Todo.WebAPI.Areas.Items.Controllers
         /// </remarks>
         /// <param name="itemId">Unique identifier for the item</param>
         /// <returns></returns>
-        /// <response code="200">Details about the item.</response>
+        /// <response code="200">ViewModel with details about the item.</response>
         /// <response code="404">An item with the specified <paramref name="itemId"/> does not exist.</response>
         [HttpGet("{itemId:guid}")]
         [Produces("application/json")]
-        [ProducesResponseType(typeof(TodoItemDetails), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(ItemViewModel), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(ApiResponse), (int)HttpStatusCode.NotFound)]
         public async Task<IActionResult> GetItem(Guid itemId)
         {
@@ -145,7 +146,7 @@ namespace Todo.WebAPI.Areas.Items.Controllers
 
             if (item == null) return HandleInvalidResult(new ItemNotFoundResult(itemId));
 
-            return Ok(item);
+            return Ok(new ItemViewModel(item));
         }
 
         /// <summary>
