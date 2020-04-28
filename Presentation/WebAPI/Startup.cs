@@ -106,8 +106,6 @@ namespace Todo.WebAPI
                 app.UseDeveloperExceptionPage();
             }
 
-            app.UseCors("default");
-
             app.UseHttpsRedirection();
 
             app.UseExceptionHandler(a => a.Run(async context =>
@@ -118,6 +116,8 @@ namespace Todo.WebAPI
             AddSwagger(app);
 
             app.UseRouting();
+
+            app.UseCors("default");
 
             app.UseEndpoints(endpoints =>
             {

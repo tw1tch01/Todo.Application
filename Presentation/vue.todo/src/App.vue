@@ -1,16 +1,38 @@
 <template>
   <div id="app">
-    <div id="nav">
-      <router-link to="/">Home</router-link> |
-      <router-link to="/about">About</router-link>
-    </div>
-    <router-view />
+    <md-app>
+      <md-app-toolbar class="md-primary">
+        <span class="md-title">Items</span>
+        <router-link to="add" class="md-button md-icon-button">
+          <md-icon>add_circle</md-icon>
+        </router-link>
+      </md-app-toolbar>
+
+      <md-app-drawer md-permanent="full">
+        <NavigationSideMenu></NavigationSideMenu>
+      </md-app-drawer>
+
+      <md-app-content>
+        <router-view />
+      </md-app-content>
+    </md-app>
   </div>
 </template>
 
+<script>
+import NavigationSideMenu from "@/views/NavigationSideMenu.vue";
+
+export default {
+  name: "App",
+  components: {
+    NavigationSideMenu
+  }
+};
+</script>
+
 <style lang="scss">
 #app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
+  font-family: Roboto, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
@@ -28,5 +50,14 @@
       color: #42b983;
     }
   }
+}
+
+.md-app {
+  min-height: 100vh;
+}
+
+a.md-button.md-icon-button {
+  line-height: 2.5;
+  margin: 0;
 }
 </style>
