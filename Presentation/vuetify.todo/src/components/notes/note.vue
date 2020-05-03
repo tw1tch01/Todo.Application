@@ -1,5 +1,9 @@
 <template>
   <v-card flat>
+    <v-card-text>
+      <v-textarea :readonly="!editComment" v-model="note.comment"></v-textarea>
+      <span> By {{ note.created.by }} on {{ note.created.on }} </span>
+    </v-card-text>
     <v-card-actions>
       <v-btn icon @click="editComment = !editComment">
         <v-icon>mdi-comment-edit-outline</v-icon>
@@ -11,23 +15,6 @@
         <v-icon>mdi-comment-arrow-left-outline</v-icon>
       </v-btn>
     </v-card-actions>
-    <v-card-text>
-      <v-row>
-        <v-col md="12">
-          <v-text-field
-            :readonly="!editComment"
-            v-model="note.comment"
-          ></v-text-field>
-          <span> By {{ note.created.by }} on {{ note.created.on }} </span>
-          <Comments
-            v-for="reply in note.replies"
-            :note="reply"
-            :key="reply.noteId"
-          ></Comments>
-        </v-col>
-      </v-row>
-      <v-text-field label="Reply" v-if="addReply" />
-    </v-card-text>
   </v-card>
 </template>
 
@@ -50,9 +37,9 @@ export default {
   padding-left: 20px !important;
 }
 
-.v-card__actions {
-  position: absolute;
-  top: 0;
-  right: 20px;
-}
+// .v-card__actions {
+//   position: absolute;
+//   top: 0;
+//   right: 20px;
+// }
 </style>

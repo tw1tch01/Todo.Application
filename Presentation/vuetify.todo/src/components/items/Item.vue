@@ -1,27 +1,46 @@
 <template>
-  <v-row v-if="!isLoading">
-    <v-col md="12">
+  <v-row :key="$route.params.itemId">
+    <ProgressBar :show="this.isLoading" />
+    <v-col md="12" v-if="!isLoading">
       <v-tabs grow>
-        <v-tab key="details">Details</v-tab>
+        <v-tab ref="details" key="details">Details</v-tab>
         <v-tab key="comments">Comments</v-tab>
-        <v-tab key="childItems" v-if="hasChildren">Children</v-tab>
+        <v-tab key="childItems">Children</v-tab>
 
         <v-tab-item key="details">
           <v-row>
             <v-col md="7">
               <v-card flat>
-                <v-card-title>{{ viewModel.item.name }}</v-card-title>
-                <v-card-subtitle
-                  >is due on {{ viewModel.item.dueDate }}
-                </v-card-subtitle>
-                <v-card-text>
-                  <v-textarea readonly :value="viewModel.item.description" />
-                  <p>
-                    <span>has {{ viewModel.item.priority }}</span> priority and
-                    is of
-                    <span>{{ viewModel.item.importance }}</span> importance.
-                  </p>
-                </v-card-text>
+                <v-text-field
+                  v-model="viewModel.item.name"
+                  label="Name"
+                  readonly
+                />
+
+                <v-textarea
+                  v-model="viewModel.item.description"
+                  label="Description"
+                  readonly
+                />
+
+                <v-text-field
+                  v-if="viewModel.item.dueDate"
+                  v-model="viewModel.item.dueDate"
+                  label="Due Date"
+                  readonly
+                />
+
+                <v-text-field
+                  label="Importance"
+                  :value="viewModel.item.importance"
+                  readonly
+                ></v-text-field>
+
+                <v-text-field
+                  label="Priority"
+                  :value="viewModel.item.priority"
+                  readonly
+                ></v-text-field>
               </v-card>
             </v-col>
             <v-col md="4" offset="1">
@@ -41,6 +60,12 @@
             :note="note"
             :key="note.noteId"
           ></Comments>
+          <v-input>
+            <v-text-field type="text" />
+            <v-btn icon @click="addComment">
+              <v-icon>mdi-comment-plus-outline</v-icon>
+            </v-btn>
+          </v-input>
         </v-tab-item>
 
         <v-tab-item key="childItems">
@@ -51,6 +76,7 @@
           ></ListItem>
         </v-tab-item>
       </v-tabs>
+      <v-btn @click="$router.go(-1)">Back</v-btn>
     </v-col>
   </v-row>
 </template>
@@ -81,10 +107,19 @@ export default {
   methods: {
     viewItem() {
       this.$store.dispatch(GET_ITEM, this.$route.params.itemId);
+    },
+    addComment() {
+      console.log("add comment");
     }
   },
   created() {
     this.viewItem();
+  },
+  watch: {
+    "$route.params.itemId": function() {
+      console.log("render");
+      this.viewItem();
+    }
   }
 };
 </script>
